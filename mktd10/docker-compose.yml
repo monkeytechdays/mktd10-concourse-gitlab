@@ -1,0 +1,40 @@
+version: '3.3'
+
+services:
+  init:
+    build: ./init
+    image: mktd/mktd10-init
+    restart: on-failure
+    depends_on: [gogs]
+
+  db:
+    image: postgres:11.5
+    environment:
+    - POSTGRES_DB=${CONCOURSE_POSTGRES_DATABASE}
+    - POSTGRES_USER=${CONCOURSE_POSTGRES_USER}
+    - POSTGRES_PASSWORD=${CONCOURSE_POSTGRES_PASSWORD}
+    - PGDATA=/database
+
+  concourse:
+    image: concourse/concourse:5.4.1
+    command: quickstart
+    privileged: true
+    depends_on: [db,gogs]
+    ports: ["8080:8080"]
+    environment:
+    - CONCOURSE_POSTGRES_HOST=db
+    - CONCOURSE_POSTGRES_USER
+    - CONCOURSE_POSTGRES_PASSWORD
+    - CONCOURSE_POSTGRES_DATABASE
+    - CONCOURSE_EXTERNAL_URL=http://localhost:8080
+    - CONCOURSE_ADD_LOCAL_USER
+    - CONCOURSE_MAIN_TEAM_LOCAL_USER
+    - CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER=overlay
+
+  gogs:
+    image: gogs/gogs:0.11.91
+    ports: ["10022:22", "10080:3000"]
+    volumes: ["gogs-data:/data"]
+
+volumes:
+  gogs-data:
