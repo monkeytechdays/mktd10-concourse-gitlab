@@ -4,8 +4,11 @@ services:
   init:
     build: ./init
     image: mktd/mktd10-init
-    restart: on-failure
-    depends_on: [gogs]
+    restart: 'no'
+    depends_on: [gogs,s3]
+    environment:
+    - MINIO_ACCESS_KEY
+    - MINIO_SECRET_KEY
 
   db:
     image: postgres:11.5
@@ -19,7 +22,7 @@ services:
     image: concourse/concourse:5.4.1
     command: quickstart
     privileged: true
-    depends_on: [db,gogs]
+    depends_on: [db,gogs,s3]
     ports: ["8080:8080"]
     environment:
     - CONCOURSE_POSTGRES_HOST=db
@@ -36,5 +39,15 @@ services:
     ports: ["10022:22", "10080:3000"]
     volumes: ["gogs-data:/data"]
 
+  s3:
+    image: minio/minio:RELEASE.2018-08-02T23-11-36Z
+    command: ["server", "/data"]
+    ports: ["9000:9000"]
+    environment:
+    - MINIO_ACCESS_KEY
+    - MINIO_SECRET_KEY
+    volumes: ["s3-data:/data"]
+
 volumes:
   gogs-data:
+  s3-data:
