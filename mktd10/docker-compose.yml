@@ -22,7 +22,7 @@ services:
     image: concourse/concourse:5.4.1
     command: quickstart
     privileged: true
-    depends_on: [db,gogs,s3]
+    depends_on: [db,gogs,s3,nexus]
     ports: ["8080:8080"]
     environment:
     - CONCOURSE_POSTGRES_HOST=db
@@ -48,6 +48,13 @@ services:
     - MINIO_SECRET_KEY
     volumes: ["s3-data:/data"]
 
+  nexus:
+    image: sonatype/nexus3:3.18.1
+    ports: ["8081:8081"]
+    volumes: ["nexus-data:/nexus-data"]
+
+
 volumes:
   gogs-data:
   s3-data:
+  nexus-data:
