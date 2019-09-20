@@ -21,5 +21,6 @@ docker run --rm -it \
   --url http://gitlab.localhost/ \
   --docker-image "ubuntu:18.04" \
   --docker-links gitlab:gitlab.localhost \
+  --docker-volumes '/var/run/docker.sock:/var/run/docker.sock' \
   --docker-privileged \
   --env "DOCKER_TLS_CERTDIR=" \
