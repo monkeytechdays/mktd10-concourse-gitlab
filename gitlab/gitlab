@@ -16,11 +16,11 @@ docker run -d \
   -p 9022:22 \
   -p 9090 \
   --label traefik.enable=true \
-  --label traefik.frontend.rule='Host: gitlab.localhost' \
-  --label traefik.port=80 \
+  --label traefik.web.frontend.rule='Host: gitlab.localhost' \
+  --label traefik.web.frontend.entryPoints=web \
+  --label traefik.web.port=80 \
+  --label traefik.registry.frontend.rule='Host: gitlab.localhost' \
+  --label traefik.registry.frontend.entryPoints=registry \
+  --label traefik.registry.port=5555 \
   --name gitlab \
   gitlab/gitlab-ce:latest
-
-#  --network=gitlab-network \
-#  --network-alias=gitlab.mktd \
-#  -v "${current_dir}"/conf:/etc/gitlab/ \

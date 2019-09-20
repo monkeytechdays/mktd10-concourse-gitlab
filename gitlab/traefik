@@ -6,10 +6,8 @@ current_file=$(realpath "$0")
 current_dir=$(dirname "$current_file")
 cd "$current_dir"
 
-docker run --rm -d -p 8080:8080 -p 80:80 \
+docker run -d -p 8080:8080 -p 80:80 -p 5555:5555 \
   -v "$PWD"/traefik.toml:/etc/traefik/traefik.toml \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --name traefik \
   traefik:v1.7
-
-#  --network=gitlab-network \

@@ -23,7 +23,7 @@ logLevel = "INFO"
 # Optional
 # Default: ["http"]
 #
-# defaultEntryPoints = ["http", "https"]
+defaultEntryPoints = ["web"]
 
 ################################################################
 # Entrypoints configuration
@@ -34,8 +34,10 @@ logLevel = "INFO"
 # Optional
 # Default:
 [entryPoints]
-    [entryPoints.http]
+    [entryPoints.web]
     address = ":80"
+    [entryPoints.registry]
+    address = ":5555"
 
 ################################################################
 # Traefik logs configuration
