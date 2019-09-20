@@ -15,10 +15,14 @@ docker run -d \
   --link traefik \
   -p 9022:22 \
   -p 9090 \
+  -p 81:81 \
   --label traefik.enable=true \
   --label traefik.web.frontend.rule='Host: gitlab.localhost' \
   --label traefik.web.frontend.entryPoints=web \
   --label traefik.web.port=80 \
+  --label traefik.page.frontend.rule='HostRegexp:{subdomain:.+}.gitlab-page.localhost,gitlab-page.localhost' \
+  --label traefik.page.frontend.entryPoints=web \
+  --label traefik.page.port=81 \
   --label traefik.registry.frontend.rule='Host: gitlab.localhost' \
   --label traefik.registry.frontend.entryPoints=registry \
   --label traefik.registry.port=5555 \
