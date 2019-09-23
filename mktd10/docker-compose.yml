@@ -4,13 +4,15 @@ services:
   init:
     build: ./init
     restart: 'no'
-    depends_on: [gogs,s3,vault]
+    depends_on: [gogs,s3,vault,nexus]
     environment:
     - MINIO_ACCESS_KEY
     - MINIO_SECRET_KEY
     - VAULT_TOKEN=${VAULT_DEV_ROOT_TOKEN_ID}
     - VAULT_ADDR=${CONCOURSE_VAULT_URL}
     - CONCOURSE_VAULT_CLIENT_TOKEN
+    - NEXUS_ADMIN_PASSWORD
+    volumes: ["nexus-data:/nexus-data"]
 
 
   db:
@@ -25,7 +27,7 @@ services:
     image: concourse/concourse:5.4.1
     command: quickstart
     privileged: true
-    depends_on: [db,gogs,s3,nexus]
+    depends_on: [db,gogs,s3,nexus,vault]
     ports: ["8080:8080"]
     environment:
     - CONCOURSE_POSTGRES_HOST=db
@@ -55,7 +57,7 @@ services:
 
   nexus:
     image: sonatype/nexus3:3.18.1
-    ports: ["8081:8081"]
+    ports: ["8081:8081", "8082:8082", "8083:8083"]
     volumes: ["nexus-data:/nexus-data"]
 
   vault:

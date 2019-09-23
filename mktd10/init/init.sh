@@ -3,9 +3,12 @@
 set -o pipefail
 
 function main() {
-       gogs.main  \
-    && minio.main \
-    && vault.main
+    local rc=0
+    gogs.main  || rc=$?
+    minio.main || rc=$?
+    vault.main || rc=$?
+    nexus.main || rc=$?
+    return $?
 }
 
 function core.logs() {
@@ -13,28 +16,84 @@ function core.logs() {
     sed "s/^/${prefix} /"
 }
 
-function http.wait_for() {
-    local http_code=0
-    local http_rc=1
-    local http_attempt=4
+function file.wait_for() {
+    local file_path="$1"
+    local file_rc=1
+    local file_attempt=0
 
-    while [[ "${http_rc}" -gt 0 && "${http_code}" -lt 200 && "${http_code}" -ge 300 ]]; do
-        [[ "${http_attempt}" -gt 0 ]] || {
-            return 1
+    while [[ "${file_rc}" -gt 0 && "${file_attempt}" -le 10 ]]; do
+        [[ "${file_attempt}" -eq 0 ]] || {
+            echo "Retry #${file_attempt}"
+            sleep 15
         }
-        sleep 3
-        curl -L -w '%{http_code}' -s -o '/dev/null' "$@" > /tmp/waitforhttp_code.txt; http_rc=$?
-        http_code=$(cat /tmp/waitforhttp_code.txt)
-        ((http_attempt-=1))
+        [[ -f "${file_path}" ]]; file_rc=$?
+        ((file_attempt+=1))
+    done
+}
+
+function http.request() {
+    local response_file="$(mktemp)"
+    local http_code="$(curl -sL -w '%{http_code}' -o "${response_file}" "$@")"; local http_rc=$?
+
+    if [[ "${http_code}" -ge 200 && "${http_code}" -lt 300 ]]; then
+        http_rc=0
+    elif [[ "${http_rc}" -ne 0 ]]; then
+        http_rc=99
+    else
+        case "${http_code}" in
+            401)
+                http_rc=41
+                ;;
+            403)
+                http_rc=43
+                ;;
+            404)
+                http_rc=44
+                ;;
+            *)
+                http_rc=90
+                ;;
+        esac
+    fi
+
+    [[ -f "${response_file}" ]] && {
+        cat "${response_file}"
+        rm -rf "${response_file}"
+    }
+
+    return "${http_rc}"
+}
+
+function http.wait_for() {
+    local http_rc=1
+    local http_attempt=0
+    local http_bodyfile='/tmp/waitforhttp_response.txt'
+
+    while [[ "${http_rc}" -gt 0 && "${http_attempt}" -le 10 ]]; do
+        [[ "${http_attempt}" -eq 0 ]] || {
+            echo "Retry #${http_attempt}"
+            sleep 15
+        }
+        http.request "$@" > "${http_bodyfile}"; http_rc=$?
+
+        if [[ "${http_rc}" -ne 0 && -s "${http_bodyfile}" ]]; then
+            cat "${http_bodyfile}"
+            echo
+        fi
+        ((http_attempt+=1))
     done
 
-    return 0
+    return "${http_rc}"
 }
 
 function gogs.main() {
     echo "[GOGS ]"
     gogs_url='http://gogs:3000'
-    gogs.wait && gogs.install
+    gogs.wait && gogs.install && echo "[GOGS ] Success" || {
+        local rc=$?
+        echo "[GOGS ] Failed" >&2
+        return $rc
+    }
 }
 
 function gogs.wait() {
@@ -47,16 +106,14 @@ function gogs.wait() {
 }
 
 function gogs.install() {
-    local installation_status=$(curl -L -s -o /dev/null -w '%{http_code}' -b '/tmp/gogs_install_cookies.txt' -c '/tmp/gogs_install_cookies.txt' "${gogs_url}/install") || return $?
+    http.request -b '/tmp/gogs_install_cookies.txt' -c '/tmp/gogs_install_cookies.txt' "${gogs_url}/install" >/dev/null; local installation_status=$?
     echo "[GOGS ] GET /install > ${installation_status}"
 
-    if [[ "${installation_status}" != '404' ]]; then
+    if [[ "${installation_status}" -eq 0 ]]; then
         echo "[GOGS ] POST /install"
-        installation_status="$(curl -X POST -L -s "${gogs_url}/install" \
+        http.request -X POST "${gogs_url}/install" \
              -b '/tmp/gogs_install_cookies.txt' \
              -c '/tmp/gogs_install_cookies.txt' \
-             -o '/tmp/gogs_install_post.txt' \
-             -w '%{http_code}' \
              -F 'db_type=SQLite3' \
              -F 'db_host=127.0.0.1:3306' \
              -F 'db_user=root' \
@@ -83,8 +140,9 @@ function gogs.install() {
              -F 'admin_passwd=root' \
              -F 'admin_confirm_passwd=root' \
              -F 'admin_email=root@localhost' \
-        )"
-        [[ "${installation_status}" -lt 300 ]] || {
+             -o '/tmp/gogs_install_post.txt' \
+             > /dev/null
+        [[ "${installation_status}" -eq 0 ]] || {
             echo "[GOGS ] Installation failed (${installation_status})" >&2
             cat '/tmp/gogs_install_post.txt'
             return 1
@@ -98,7 +156,11 @@ function gogs.install() {
 
 function minio.main() {
     echo "[MINIO]"
-    minio.wait && minio.init_bucket
+    minio.wait && minio.init_bucket && echo "[MINIO] Success" || {
+        local rc=$?
+        echo "[MINIO] Failed" >&2
+        return $rc
+    }
 }
 
 function minio.wait() {
@@ -110,11 +172,15 @@ function minio.wait() {
     }
 }
 
+function minio.client() {
+    MC_HOST_s3="http://${MINIO_ACCESS_KEY}:${MINIO_SECRET_KEY}@s3:9000" mc "$@"
+}
+
 function minio.init_bucket() {
     echo "[MINIO] Check bucket"
-    if ! MC_HOST_s3="http://${MINIO_ACCESS_KEY}:${MINIO_SECRET_KEY}@s3:9000" mc ls -q s3/concourse; then
+    if ! minio.client ls -q s3/concourse; then
         echo "[MINIO] Create bucket"
-        MC_HOST_s3="http://${MINIO_ACCESS_KEY}:${MINIO_SECRET_KEY}@s3:9000" mc mb s3/concourse || {
+        minio.client mb s3/concourse || {
             local rc=$?
             echo "[MINIO] Unable to create bucket" >&2
             return $rc
@@ -127,7 +193,11 @@ function minio.init_bucket() {
 
 function vault.main() {
     echo "[VAULT]"
-    vault.wait && vault.create_secrets && vault.create_policy && vault.create_token
+    vault.wait && vault.create_secrets && vault.create_policy && vault.create_token && echo "[VAULT] Success" || {
+        local rc=$?
+        echo "[VAULT] Failed" >&2
+        return $rc
+    }
 }
 
 function vault.wait() {
@@ -194,4 +264,117 @@ function vault.create_token() {
     return 0
 }
 
-main "$@#"
+
+function nexus.main() {
+    echo "[NEXUS]"
+    nexus_url='http://nexus:8081'
+    nexus.wait \
+    && nexus.init_system_user \
+    && nexus.init_complete \
+    && echo "[NEXUS] Success" \
+    || {
+        local rc=$?
+        echo "[NEXUS] Failed" >&2
+        return $rc
+    }
+}
+
+function nexus.http.request() {
+    local path=$1; shift
+    http.request -u "${nexus_auth}" "${nexus_url}${path}" "$@"
+}
+
+
+function nexus.run_script() {
+    local script="$1"; shift
+    local run_args=()
+    [[ $# -gt 0 ]] && run_args=('-d' "$1") && shift
+
+    echo "[NEXUS] Execute script '${script}'"
+    local http_bodyfile="/tmp/nexus_script_${script}_response.txt"
+    local http_payload="/tmp/nexus_script_${script}_payload.json"
+    local http_rc=0
+
+    jq -n --rawfile scriptfile "/etc/init/nexus/${script}.groovy" --arg scriptname "${script}" '{"name":$scriptname, "type":"groovy","content":$scriptfile}' > "${http_payload}" || return $?
+
+    nexus.http.request "/service/rest/v1/script/${script}" -X 'PUT' -H 'Content-Type: application/json' -d "@${http_payload}" > "${http_bodyfile}"; http_rc=$?
+    [[ "${http_rc}" -eq 44 ]] && {
+        nexus.http.request "/service/rest/v1/script/" -X 'POST' -H 'Content-Type: application/json' -d "@${http_payload}" > "${http_bodyfile}"; http_rc=$?
+    }
+
+    [[ "${http_rc}" -eq 0 ]] || {
+        echo "Unable to upload script '${script}' (rc: ${http_rc})" >&2
+        [[ ! -s "${http_bodyfile}" ]] || {
+            cat "${http_bodyfile}" >&2
+            echo                   >&2
+        }
+        return 1
+    }
+
+    nexus.http.request "/service/rest/v1/script/${script}/run" -X 'POST' -H 'Content-Type: application/json' > "${http_bodyfile}"; http_rc=$?
+    [[ "${http_rc}" -eq 0 ]] || {
+        echo "Error while running script '${script}' (rc: ${http_rc})" >&2
+        [[ ! -s "${http_bodyfile}" ]] || {
+            cat "${http_bodyfile}" >&2
+            echo                   >&2
+        }
+        return 1
+    }
+    [[ ! -s "${http_bodyfile}" ]] || {
+        cat "${http_bodyfile}"
+        echo
+    }
+}
+
+function nexus.wait() {
+    echo "[NEXUS] Wait for availability"
+    http.wait_for "${nexus_url}/service/rest/v1/read-only" || {
+        local rc=$?
+        echo "[NEXUS] Not available" >&2
+        return $rc
+    }
+}
+
+function nexus.init_system_user() {
+    local check_provided_password_response='/tmp/nexus_check_provided_password_response.txt'
+    nexus_auth="admin:${NEXUS_ADMIN_PASSWORD}"
+    nexus.http.request '/service/rest/v1/read-only' > "${check_provided_password_response}"; local http_rc=$?
+    if [[ "${http_rc}" -eq 0 ]] ; then
+        echo "[NEXUS] Using provided password"
+        return 0
+    else
+        echo "[NEXUS] Unable to connect with provided password (rc: ${http_rc})"
+    fi
+
+    echo "[NEXUS] Wait for password file"
+    local nexus_password_file='/nexus-data/admin.password'
+    file.wait_for "${nexus_password_file}" || {
+        echo "Missing password file" >&2
+        return 1
+    }
+
+    nexus_default_password=$(cat "${nexus_password_file}")
+    echo "[NEXUS] Using temporary password: ${nexus_default_password}"
+    echo "[NEXUS]"
+
+    nexus_auth="admin:${nexus_default_password}"
+    nexus.http.request '/service/rest/v1/read-only' > "${check_provided_password_response}"; http_rc=$?
+    [[ "${http_rc}" -eq 0 ]] || {
+        echo "Unable to connect with temporary password (rc: ${http_rc})" >&2
+        [[ ! -s "${check_provided_password_response}" ]] || {
+            cat "${check_provided_password_response}" >&2
+            echo                                      >&2
+        }
+        return 1
+    }
+    echo "[NEXUS] Using temporary password"
+    return 0
+}
+
+function nexus.init_complete() {
+    echo "[NEXUS] Complete installation"
+    nexus.run_script 'docker-repositories'
+    nexus.run_script 'npm-repositories'
+}
+
+main "$@#" 2>&1
