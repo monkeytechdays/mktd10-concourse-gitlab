@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -ex
+
+if [[ $# -lt 1 ]]; then
+  echo "Expecting at least a runner name as first argument"
+  exit 2
+fi
+
+RUNNER_NAME=$1
+shift 1
+
+docker run --rm \
+  -v gitlab-runner-config-"$RUNNER_NAME":/etc/gitlab-runner \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --link gitlab:gitlab.localhost \
+  gitlab/gitlab-runner:latest \
+  -- unregister \
+  --name runner-"$RUNNER_NAME"

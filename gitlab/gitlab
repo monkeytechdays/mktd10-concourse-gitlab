@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -e
+
+current_file=$(realpath "$0")
+current_dir=$(dirname "${current_file}")
+
+
+docker run -d \
+  -v gitlab-logs:/var/log/gitlab \
+  -v gitlab-data:/var/opt/gitlab \
+  -v gitlab-config:/etc/gitlab \
+  -e GITLAB_OMNIBUS_CONFIG="external_url 'http://gitlab.localhost/'" \
+  --hostname gitlab \
+  --link traefik \
+  -p 9022:22 \
+  -p 9090 \
+  -p 81:81 \
+  --label traefik.enable=true \
+  --label traefik.web.frontend.rule='Host: gitlab.localhost' \
+  --label traefik.web.frontend.entryPoints=web \
+  --label traefik.web.port=80 \
+  --label traefik.page.frontend.rule='HostRegexp:{subdomain:.+}.gitlab-page.localhost,gitlab-page.localhost' \
+  --label traefik.page.frontend.entryPoints=web \
+  --label traefik.page.port=81 \
+  --label traefik.registry.frontend.rule='Host: gitlab.localhost' \
+  --label traefik.registry.frontend.entryPoints=registry \
+  --label traefik.registry.port=5555 \
+  --name gitlab \
+  gitlab/gitlab-ce:latest
