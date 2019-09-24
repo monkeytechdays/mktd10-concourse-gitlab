@@ -1,8 +1,17 @@
+import org.sonatype.nexus.security.internal.RealmManagerImpl
 import org.sonatype.nexus.blobstore.api.BlobStoreManager
+
+def realmManager = container.lookup(RealmManagerImpl.class.getName())
+
+realmManager.enableRealm('DockerToken', true)
 
 if (!repository.repositoryManager.exists('docker-internal')) {
     log.info('Create "docker-internal" repository')
-    repository.createDockerHosted('docker-internal', 8082, null)
+    repository.createDockerHosted(
+        'docker-internal',  // name
+        8082,               // httpPort
+        null                // httpsPort
+    )
 }
 
 if (!repository.repositoryManager.exists('docker-hub')) {
@@ -13,17 +22,22 @@ if (!repository.repositoryManager.exists('docker-hub')) {
         'HUB',                          // indexType
         null,                           // indexUrl
         null,                           // httpPort
-        null,                           // httpsPort
-        BlobStoreManager.DEFAULT_BLOBSTORE_NAME, // blobStoreName
-        true, // strictContentTypeValidation
-        true  // v1Enabled
+        null                            // httpsPort
     )
 }
 
 
 if (!repository.repositoryManager.exists('docker-all')) {
     def groupMembers = ['docker-hub', 'docker-internal']
-    repository.createDockerGroup('docker-all', 8083, null, groupMembers, true)
+    repository.createDockerGroup(
+        'docker-all',                            // name
+        8083,                                    // httpPort
+        null,                                    // httpsPort
+        groupMembers,                            // members
+        true,                                    // v1Enabled
+        BlobStoreManager.DEFAULT_BLOBSTORE_NAME, // blobStoreName
+        false                                    // forceBasicAuth
+    )
 }
 
 "Repositories: [docker-internal, docker-hub, docker-all]"
