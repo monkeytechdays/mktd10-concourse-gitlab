@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -ex
+
+if [[ $# -lt 1 ]]; then
+  echo "Expecting at least a directory to server as first argument"
+  exit 2
+fi
+
+APP_DIR=$(realpath "$1")
+shift 1
+
+current_file=$(realpath "$0")
+current_dir=$(dirname "${current_file}")
+
+docker run -it --rm \
+  -v "${APP_DIR}:/app" \
+  -p 5000:5000 \
+  node:8.16.1-jessie \
+  /bin/bash -c "npm install -g serve; serve -s /app"

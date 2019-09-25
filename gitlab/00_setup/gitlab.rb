@@ -566,13 +566,13 @@
 ##! Docs: https://docs.gitlab.com/ce/administration/container_registry.html
 ################################################################################
 
-registry_external_url 'https://registry.localhost:5555'
+registry_external_url 'http://gitlab.localhost:5555'
 
 ### Settings used by GitLab application
-gitlab_rails['registry_enabled'] = true
-gitlab_rails['registry_host'] = "registry.localhost"
-gitlab_rails['registry_port'] = "5555"
-gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
+#gitlab_rails['registry_enabled'] = true
+#gitlab_rails['registry_host'] = "gitlab.localhost"
+#gitlab_rails['registry_port'] = "5555"
+#gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
 
 ###! **Do not change the following 3 settings unless you know what you are
 ###!   doing**
@@ -587,7 +587,7 @@ gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
 # registry['uid'] = nil
 # registry['gid'] = nil
 # registry['dir'] = "/var/opt/gitlab/registry"
-# registry['registry_http_addr'] = "localhost:5000"
+# registry['registry_http_addr'] = "gitlab.localhost:5555"
 # registry['debug_addr'] = "localhost:5001"
 # registry['log_directory'] = "/var/log/gitlab/registry"
 # registry['env_directory'] = "/opt/gitlab/etc/registry/env"
@@ -1243,8 +1243,9 @@ gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
 ################################################################################
 
 ##! Define to enable GitLab Pages
-# pages_external_url "http://pages.example.com/"
-# gitlab_pages['enable'] = false
+pages_external_url "http://gitlab-page.localhost/"
+
+gitlab_pages['enable'] = true
 
 ##! Configure to expose GitLab Pages on external IP address, serving the HTTP
 # gitlab_pages['external_http'] = []
@@ -1290,7 +1291,7 @@ gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
 
 ##! Environments that do not support bind-mounting should set this parameter to
 ##! true. This is incompatible with the artifacts server
-# gitlab_pages['inplace_chroot'] = false
+gitlab_pages['inplace_chroot'] = true
 
 ##! Prometheus metrics for Pages docs: https://gitlab.com/gitlab-org/gitlab-pages/#enable-prometheus-metrics
 # gitlab_pages['metrics_address'] = ":9235"
@@ -1333,7 +1334,9 @@ gitlab_rails['registry_path'] = "/var/opt/gitlab/gitlab-rails/shared/registry"
 # `pages_nginx['some_setting']` and should be set separately.
 
 # Below you can find settings that are exclusive to "GitLab Pages NGINX"
-# pages_nginx['enable'] = false
+pages_nginx['enable'] = true
+
+pages_nginx['listen_port'] = 81
 
 # gitlab_rails['pages_path'] = "/var/opt/gitlab/gitlab-rails/shared/pages"
 
