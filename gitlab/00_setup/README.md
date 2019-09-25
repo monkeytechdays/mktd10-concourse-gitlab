@@ -1,13 +1,14 @@
 
-# Setup de l'infra
+Setup de l'infra
+===
 
-## Préparatifs
+# Préparatifs
 
-### Linux
+## Linux
 
 Installer Docker.
 
-### MacOS
+## MacOS
 
 Installer Docker Desktop
 
@@ -15,22 +16,22 @@ Editer `/etc/hosts` pour y modifier la ligne suivante:
 
     127.0.0.1 localhost gitlab.localhost root.gitlab-page.localhost gitlab-page.localhost
 
-### Windows
+## Windows
 
 Installer Docker.
 
-Si Docker Desktop n'est pas supporté par le Windows utilisé, installer Docker Toolbox, basé sur VirtualBox. Puis configurer la machine virtuelle dédiée à Docker pour y ajouter des redirection de ports: 80, 5555
+Si Docker Desktop n'est pas supporté par le Windows utilisé, installer Docker Toolbox, basé sur VirtualBox. Puis configurer la machine virtuelle dédiée à Docker pour y ajouter des redirection de ports: 80, 5555, 4567, 4568
 
 Editer `\WINDOWS\system32\drivers\etc\hosts` pour y modifier la ligne suivante:
 
     127.0.0.1 localhost gitlab.localhost root.gitlab-page.localhost gitlab-page.localhost
 
 
-## Démarrer GitLab
+# Démarrer GitLab
 
 Traefik va gérer l'exposition des services web de manière dynamique (pas besoin de le redémarrer en cas de changement de configuration ou redémarrage de GitLab).
 
-Pour le démarrer:
+Pour le démarrer, lancer le script:
 
     ./traefik
 
@@ -49,7 +50,7 @@ Copier le ficher de configuration préparé et redémarrer gitlab:
 
 Attendre la fin de la configuration de GitLab, puis aller sur http://gitlab.localhost pour y créer le premier compte, le compte `root`.
 
-## Démarrer des runners GitLab-CI
+# Démarrer des runners GitLab-CI
 
 Les scripts frounis permettent de gérer autant de runner que souhaité. Il devra être juste donné à chaque runner un identifiant unique. Un nombre peut suffir comme identifiant unique.
 
@@ -77,7 +78,7 @@ Ainsi si besoin d'un autre runner, il pourra être démarré avec:
     ./register-runner 2
     ./launch-runner 2
 
-## Logs, stop, restart
+# Logs, stop, restart
 
 Traefik, GitLab et les runners ont des containers nommés dans Docker, respectivement `traefik`, `gitlab`, et `gitlab-runner-${ID}`.
 
