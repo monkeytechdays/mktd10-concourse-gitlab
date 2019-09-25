@@ -1,7 +1,7 @@
 MKTD #10 - Concourse - 01 Tâche
 ===
 
-# Présentation
+## Présentation
 
 Dans Concourse la plus petite unité d'exécution est la [tâche](https://concourse-ci.org/tasks.html#task-run). Une tâche peut-être décrite directement dans le _pipeline_ ou dans un fichier :
 
@@ -91,12 +91,12 @@ fly --target 'local' hijack --handle '1234567-abcd-1234-abcd-123456789012'
 fly -t 'local' i --handle '1234567-abcd-1234-abcd-123456789012'
 ```
 
-# Exercice 01a - Génération d'un projet Rust
+## Exercice 01a - Génération d'un projet Rust
 
 1. Réalisez une tâche qui permet d'initialiser un projet Rust. Vous pouvez utiliser [l'image Docker officielle](https://hub.docker.com/_/rust). Pour initialiser un nouveau projet, il faut utiliser [`cargo`](https://doc.rust-lang.org/book/ch01-03-hello-cargo.html#creating-a-project-with-cargo).
 2. Connectez-vous au conteneur pour parcourir l'arborescence du projet.
 
-# Exercice 01b - Nom de projet dynamique
+## Exercice 01b - Nom de projet dynamique
 
 1. Reprenez la tâche écrite précédemment pour rendre variable le nom du projet.
 2. Connectez-vous au conteneur pour vérifier que le nom a bien été pris en compte.
