@@ -4,16 +4,35 @@ set -o pipefail
 
 function main() {
     local rc=0
-    gogs.main  || rc=$?
-    minio.main || rc=$?
-    vault.main || rc=$?
-    nexus.main || rc=$?
-    return $?
+    local result=''
+    for service in gogs minio vault nexus; do
+        "${service}.main" && result="${result}${service}: success"$'\n' || {
+            rc=$?
+            result="${result}"$'\n: failure'
+        }
+    done
+    # gogs.main &&|| rc=$?
+    # minio.main || rc=$?
+    # vault.main || rc=$?
+    # nexus.main || rc=$?
+
+    core.title ' R E S U L T '
+    echo "${result}"
+
+    return $rc
 }
 
 function core.logs() {
     local prefix="$1"; shift
     sed "s/^/${prefix} /"
+}
+
+function core.title() {
+    cat <<EOF
+
+ ¤ ¤ $1 ¤ ¤
+
+EOF
 }
 
 function file.wait_for() {
@@ -87,7 +106,7 @@ function http.wait_for() {
 }
 
 function gogs.main() {
-    echo "[GOGS ]"
+    core.title ' G O G S '
     gogs_url='http://gogs:3000'
     gogs.wait && gogs.install && echo "[GOGS ] Success" || {
         local rc=$?
@@ -155,7 +174,7 @@ function gogs.install() {
 }
 
 function minio.main() {
-    echo "[MINIO]"
+    core.title " M I N I O "
     minio.wait && minio.init_bucket && echo "[MINIO] Success" || {
         local rc=$?
         echo "[MINIO] Failed" >&2
@@ -192,7 +211,7 @@ function minio.init_bucket() {
 }
 
 function vault.main() {
-    echo "[VAULT]"
+    core.title ' V A U L T '
     vault.wait && vault.create_secrets && vault.create_policy && vault.create_token && echo "[VAULT] Success" || {
         local rc=$?
         echo "[VAULT] Failed" >&2
@@ -266,7 +285,7 @@ function vault.create_token() {
 
 
 function nexus.main() {
-    echo "[NEXUS]"
+    core.title ' N E X U S '
     nexus_url='http://nexus:8081'
     nexus.wait \
     && nexus.init_system_user \
