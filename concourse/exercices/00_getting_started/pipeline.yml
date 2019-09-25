@@ -1,0 +1,15 @@
+jobs:
+- name: greet
+  plan:
+  - task: echo
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: nexus:8083/alpine
+          tag: 3.10
+          insecure_registries: [ "nexus:8083" ]
+      run:
+        path: echo
+        args: ["Hello World"]
