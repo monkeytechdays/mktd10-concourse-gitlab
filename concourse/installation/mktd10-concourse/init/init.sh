@@ -11,10 +11,6 @@ function main() {
             result="${result}"$'\n: failure'
         }
     done
-    # gogs.main &&|| rc=$?
-    # minio.main || rc=$?
-    # vault.main || rc=$?
-    # nexus.main || rc=$?
 
     core.title ' R E S U L T '
     echo "${result}"
