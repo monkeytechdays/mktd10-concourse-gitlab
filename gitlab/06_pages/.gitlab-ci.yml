@@ -31,6 +31,12 @@ test:
   stage: test
   script:
     - mvn -Dmaven.repo.local=$CI_PROJECT_DIR/.m2repo verify
+  artifacts:
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+        - target/failsafe-reports/TEST-*.xml
+  allow_failure: true
 
 deploy:
   stage: deploy
