@@ -1,0 +1,17 @@
+platform: linux
+image_resource:
+    type: docker-image
+    source:
+        repository: nexus:8083/node
+        tag: 10.16.3-stretch
+        insecure_registries: [ "nexus:8083" ]
+
+inputs:
+  - name: src
+  - name: node_modules
+
+run:
+    path: bash
+    args: ["-c", "mv node_modules/node_modules src/ && pushd src && npm run test"]
+params:
+  CI: true

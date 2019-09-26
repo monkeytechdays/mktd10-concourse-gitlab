@@ -1,0 +1,18 @@
+platform: linux
+image_resource:
+    type: docker-image
+    source:
+        repository: nexus:8083/node
+        tag: 10.16.3-stretch
+        insecure_registries: [ "nexus:8083" ]
+
+inputs:
+  - name: src
+outputs:
+  - name: node_modules
+
+run:
+    path: bash
+    args: ["-c", "pushd src && npm install && popd && mv src/node_modules node_modules/"]
+params:
+    NPM_CONFIG_REGISTRY: http://nexus:8081/repository/npm-all/
