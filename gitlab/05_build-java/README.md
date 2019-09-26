@@ -35,7 +35,7 @@ Nous vondront alors éviter cette double erreur, et ne lancer les tests que si l
 
 Pour cela, utilisez des `stage` (cf https://docs.gitlab.com/ee/ci/yaml/#stages).
 
-# "Retry" de job
+# "Retry" de job (Exercice optionnel)
 
 Un build peut dépendre de resources externes, de son environement d'exécution, comme par exemple une bonne connection Internet pour télécharger des dépendances.
 
@@ -53,6 +53,14 @@ Dans le fichier `src/test/java/io/monkeypatch/mktd10/MainTests.java` du projet, 
 Ajoutez aussi un autre `stage` de déploiement, qui devra s'exécuter après celui des tests. Pour l'instant, faites juste un job dont le script est un simple `echo "deploy!"`.
 
 Committez, poussez, et après l'exécution du pipeline correspondant à ce nouveau code, vous pourrez relancer le job correspondant aux tests et voir les effets sur le reste du pipeline.
+
+# Publication des rapports de tests (Exercice optionnel)
+
+La commande `mvn verify` publie des rapports de tests dans les fichiers `target/surefire-reports/TEST-*.xml` et `target/failsafe-reports/TEST-*.xml`.
+
+GitLab sait les interpréter dans le cadre d'un MR.
+
+La documentation associée est à trouver ici: https://docs.gitlab.com/ee/ci/junit_test_reports.html
 
 # Indices
 
