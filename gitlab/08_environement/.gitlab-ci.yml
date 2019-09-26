@@ -4,6 +4,9 @@ stages:
   - test
   - deploy
 
+variables:
+  APP_IMAGE_NAME: gitlab.localhost:5555/root/my-spark-app
+
 image: maven:3.6.2-jdk-8
 
 cache:
@@ -60,7 +63,7 @@ deploy_staging:
     url: http://localhost:4567
   script:
     - docker stop mywebapp || true
-    - docker run --rm -d -p 4567:4567 --name mywebapp gitlab.localhost:5555/root/my-spark-app
+    - docker run --rm -d -p 4567:4567 --name mywebapp ${APP_IMAGE_NAME}
   only:
     - master
 
@@ -73,6 +76,6 @@ deploy_prod:
   when: manual
   script:
     - docker stop mywebapp-prod || true
-    - docker run --rm -d -p 4568:4567 --name mywebapp-prod gitlab.localhost:5555/root/my-spark-app
+    - docker run --rm -d -p 4568:4567 --name mywebapp-prod ${APP_IMAGE_NAME}
   only:
     - master
