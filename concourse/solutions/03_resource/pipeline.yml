@@ -1,0 +1,78 @@
+resources:
+  - name: src
+    type: git
+    icon: git
+    source:
+        uri: http://gogs:3000/mktd10-concourse/03-resource-rust.git
+        branch: master
+  - name: bin-A
+    type: s3
+    icon: folder-open
+    check_every: 1h
+    source: &s3
+        endpoint: http://s3:9000
+        disable_ssl: true
+        bucket: concourse
+        regexp: 03-resource/rust/A/my-rust-app-(.*)
+        access_key_id: minio-access-key
+        secret_access_key: minio-secret-key
+  - name: bin-B
+    type: s3
+    icon: folder-open
+    check_every: 1h
+    source:
+        <<: *s3
+        regexp: 03-resource/rust/B/my-rust-app-(.*)
+
+jobs:
+  - name: generate-rust-bin
+    plan:
+      - get: src
+      - task: Generate version
+        file: src/ci/tasks/generate-version.yml
+
+      - task: Generate project A
+        file: src/ci/tasks/rust-new.yml
+        vars:
+            project-name: my-rust-app-A
+        input_mapping:
+            ci: src
+        output_mapping:
+            src: my-rust-app-A-src
+
+      - task: Generate project B
+        file: src/ci/tasks/rust-new.yml
+        vars:
+            project-name: my-rust-app-B
+        input_mapping:
+            ci: src
+        output_mapping:
+            src: my-rust-app-B-src
+
+      - task: Compile project A
+        file: src/ci/tasks/rust-build.yml
+        vars:
+            project-name: my-rust-app-A
+        input_mapping:
+            ci: src
+            src: my-rust-app-A-src
+        output_mapping:
+            bin: my-rust-app-A-bin
+
+      - task: Compile project B
+        file: src/ci/tasks/rust-build.yml
+        vars:
+            project-name: my-rust-app-B
+        input_mapping:
+            ci: src
+            src: my-rust-app-B-src
+        output_mapping:
+            bin: my-rust-app-B-bin
+
+      - put: bin-A
+        params:
+            file: my-rust-app-A-bin/my-rust-app-*
+
+      - put: bin-B
+        params:
+            file: my-rust-app-B-bin/my-rust-app-*

@@ -1,0 +1,19 @@
+platform: linux
+image_resource:
+    type: docker-image
+    source:
+        repository: nexus:8083/rust
+        tag: 1.37.0-stretch
+        insecure_registries: [ "nexus:8083" ]
+
+inputs:
+  - name: ci
+  - name: src
+  - name: versions
+outputs:
+  - name: bin
+
+run:
+    path: ci/ci/scripts/rust-build.sh
+params:
+    project_name: ((project-name))

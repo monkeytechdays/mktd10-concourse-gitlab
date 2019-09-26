@@ -1,0 +1,16 @@
+platform: linux
+image_resource:
+    type: docker-image
+    source:
+        repository: nexus:8083/alpine
+        tag: 3.10
+        insecure_registries: [ "nexus:8083" ]
+
+inputs:
+  - name: src
+
+outputs:
+  - name: messages
+
+run:
+    path: src/ci/scripts/write-message.sh

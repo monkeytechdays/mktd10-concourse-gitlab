@@ -1,0 +1,32 @@
+resources:
+  - name: project
+    type: git
+    icon: git
+    check_every: 1h
+    source:
+        uri: http://gogs:3000/mktd10-concourse/03-resource-demo.git
+        branch: master
+  - name: messages
+    type: s3
+    icon: folder-open
+    check_every: 1h
+    source:
+        endpoint: http://s3:9000
+        disable_ssl: true
+        bucket: concourse
+        regexp: 03-resource/demo/message-(.*).txt
+        access_key_id: minio-access-key
+        secret_access_key: minio-secret-key
+
+jobs:
+  - name: greet
+    plan:
+      - get: src
+        resource: project
+      - task: echo-hello-world
+        file: src/ci/tasks/echo-hello-world.yml
+      - task: write-message
+        file: src/ci/tasks/write-message.yml
+      - put: messages
+        params:
+            file: messages/message-*.txt
