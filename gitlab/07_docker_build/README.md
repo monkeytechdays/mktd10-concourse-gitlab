@@ -22,3 +22,4 @@ Pour résoudre cet exercice, indices chez vous:
 - une commande pour télécharger tous les jars nécessaire au runtime: `mvn dependency:copy-dependencies -DincludeScope=runtime`. L'ensemble des jars se trouvera alors dans le répertoire `target/dependency`.
 - la ligne de commande `java` sait interpréter un classpath sous forme `dir/*`: tous les fichiers du répertoire `dir` seront ajoutés au classpath
 - des variables seront utiles pour se connecter au registry Docker du projet via `docker login`: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+- le mot clef `dependencies`: https://docs.gitlab.com/ee/ci/yaml/README.html#dependencies

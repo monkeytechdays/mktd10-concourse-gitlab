@@ -1,0 +1,38 @@
+stages:
+  - build
+  - test
+  - deploy
+
+image: maven:3.6.2-jdk-8
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2repo
+
+jars:
+  stage: build
+  script:
+    - mvn -Dmaven.repo.local=$CI_PROJECT_DIR/.m2repo -Dskip.test=true package
+  artifacts:
+    paths:
+      - target/*.jar
+
+pages:
+  stage: build
+  script:
+    - mvn -Dmaven.repo.local=$CI_PROJECT_DIR/.m2repo site
+    - mv target/site public
+  artifacts:
+    paths:
+      - public
+
+test:
+  stage: test
+  script:
+    - mvn -Dmaven.repo.local=$CI_PROJECT_DIR/.m2repo verify
+
+deploy:
+  stage: deploy
+  script:
+    - echo "deploy!"

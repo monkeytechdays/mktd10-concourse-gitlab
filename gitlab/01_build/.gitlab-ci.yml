@@ -1,0 +1,7 @@
+
+image: node:8.16.1-jessie
+
+build:
+  script:
+    - npm install
+    - npm run build
