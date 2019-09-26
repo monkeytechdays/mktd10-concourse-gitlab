@@ -11,3 +11,4 @@ Pour résoudre cet exercice, indices chez vous:
 
 - la documentation: https://docs.gitlab.com/ee/ci/environments.html
 - le mot clef `environment`: https://docs.gitlab.com/ee/ci/yaml/README.html#environment
+- pour éviter de la duplication de paramètres: https://docs.gitlab.com/ee/ci/yaml/#variables
