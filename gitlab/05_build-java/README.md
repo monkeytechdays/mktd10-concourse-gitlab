@@ -62,6 +62,12 @@ GitLab sait les interpréter dans le cadre d'un MR.
 
 La documentation associée est à trouver ici: https://docs.gitlab.com/ee/ci/junit_test_reports.html
 
+# Des tests en warning (Exercice optionnel)
+
+Vous pouvez faire en sorte que des tests qui ne passent pas ne bloque pas le reste du pipeline.
+
+Indice: https://docs.gitlab.com/ee/ci/yaml/README.html#allow_failure
+
 # Indices
 
 - le nom d'une image Docker pour compiler avec Maven: `maven:3.6.2-jdk-8`
