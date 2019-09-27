@@ -1,0 +1,43 @@
+resources:
+  - name: version
+    type: semver
+    source:
+        initial_version: 1.0.0-rc.0
+        driver: s3
+        bucket: concourse
+        key: 05_version/demo/version.txt
+        endpoint: http://s3:9000
+        disable_ssl: true
+        access_key_id: minio-access-key
+        secret_access_key: minio-secret-key
+
+jobs:
+  - name: read-version
+    plan:
+      - get: version
+      - task: echo
+        config:
+            platform: linux
+            image_resource:
+                type: docker-image
+                source:
+                    repository: nexus:8083/alpine
+                    tag: 3.10
+                    insecure_registries: [ "nexus:8083" ]
+            inputs:
+              - name: version
+            run:
+                path: ash
+                args: ["-c", "cat version/version && cat version/number"]
+  - name: new-rc
+    plan:
+      - put: version
+        params: {pre: rc}
+  - name: new-final
+    plan:
+      - put: version
+        params: {bump: final}
+  - name: prepare-release
+    plan:
+      - get: version
+        params: {bump: major}
