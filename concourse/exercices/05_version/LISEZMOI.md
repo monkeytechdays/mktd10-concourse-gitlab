@@ -55,7 +55,7 @@ jobs:
         bump: major
 ```
 
-Une fois la stratégie de version mise au point, la difficulté reste de la répercutée sur les différents outils. Voici quelques exemples :
+Une fois la stratégie de version mise au point, la difficulté reste de la répercuter sur les différents outils. Voici quelques exemples :
 
 ```bash
 # Maven
@@ -70,7 +70,7 @@ cargo bump "$(cat version/version)"
 
 ## Exercice 05a - Livraison continue
 
-A partir des projets `my-react-app` et `my-spark-app`, réalisez un _pipeline_ qui pour chaque commit :
+À partir des projets `my-react-app` et `my-spark-app`, réalisez un _pipeline_ qui pour chaque commit :
 
 * augmente le numéro de version
 * change le numéro de version du projet
@@ -85,4 +85,4 @@ Sur la base de l'exercice précédent, réalisez un _pipeline_ qui :
 * pour chaque commit, livre une version `rc`
 * à la demande, génère une nouvelle version finale
 
-_Attention : après une nouvelle version finale, la prochaine rc ne doit plus corresponde à la version déjà livrée !_
+_Attention : après une nouvelle version finale, la prochaine rc ne doit plus correspondre à la version déjà livrée !_
