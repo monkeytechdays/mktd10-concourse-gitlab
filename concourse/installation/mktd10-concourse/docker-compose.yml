@@ -28,13 +28,14 @@ services:
     command: quickstart
     privileged: true
     depends_on: [db,gogs,s3,nexus,vault]
-    ports: ["8080:8080"]
+    ports: ["${CONCOURSE_BIND_PORT}:${CONCOURSE_BIND_PORT}"]
     environment:
     - CONCOURSE_POSTGRES_HOST=db
     - CONCOURSE_POSTGRES_USER
     - CONCOURSE_POSTGRES_PASSWORD
     - CONCOURSE_POSTGRES_DATABASE
-    - CONCOURSE_EXTERNAL_URL=http://localhost:8080
+    - CONCOURSE_BIND_PORT
+    - CONCOURSE_EXTERNAL_URL
     - CONCOURSE_ADD_LOCAL_USER
     - CONCOURSE_MAIN_TEAM_LOCAL_USER
     - CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER=overlay
