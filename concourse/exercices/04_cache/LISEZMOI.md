@@ -3,7 +3,7 @@ MKTD #10 - Concourse - 04 Cache
 
 ## Présentation
 
-Pour optimiser le temps de traitement d'un _pipeline_ la gestion des dépendances est très importante. Les premier éléments à intégrer dans une forge pour y parvenir sont des dépôts miroirs/proxys. Par exemple, il est possible d'utiliser les solutions [Nexus](https://fr.sonatype.com/product-nexus-repository) (comme ici) ou [Artifactory](https://jfrog.com/artifactory/). La configuration de miroir peut être plus ou moins complexe selon les outils.
+Pour optimiser le temps de traitement d'un _pipeline_ la gestion des dépendances est très importante. Les premiers éléments à intégrer dans une forge pour y parvenir sont des dépôts miroirs/proxys. Par exemple, il est possible d'utiliser les solutions [Nexus](https://fr.sonatype.com/product-nexus-repository) (comme ici) ou [Artifactory](https://jfrog.com/artifactory/). La configuration de miroir peut être plus ou moins complexe selon les outils.
 
 Pour rappel, l'exemple de Docker a déjà été traité :
 
@@ -93,9 +93,10 @@ run:
 caches:
   - path: cache
 ```
+
 Cependant le cache est relatif à l'agent, au nom du job et au nom de la tâche. Ce qui utile si une tâche est dédiée à la récupération des dépendances.
 
-## Exercice 04a - Partage des dépendences Node.js
+## Exercice 04a - Partage des dépendances Node.js
 
 En Node.js, les dépendances sont installées à la racine du projet dans un répertoire `node_modules`. Pour les récupérer, il faut préalablement exécuté la commande `npm install`.
 
@@ -111,7 +112,7 @@ Avec Maven, les dépendances sont installées sous `$HOME/.m2/repository` afin d
 
 * Réalisez un _pipeline_ qui :
     * récupère les sources du projet Maven (voir `/projects/my-spark-app`)
-    * récupère les dépendances Maven (et les mets en cache)
+    * récupère les dépendances Maven (et les met en cache)
     * construit l'application (`mvn package -Dmaven.test.skip=true`) avec les dépendances récupérées précédemment
     * exécute les tests (`mvn test`) avec les dépendances récupérées précédemment
 
