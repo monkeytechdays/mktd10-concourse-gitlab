@@ -36,7 +36,7 @@ Concourse vient avec un outil en ligne de commande nommé `fly`.
 # Example
 wget -o './fly' 'http://localhost:8080/api/v1/cli?arch=amd64&platform=linux'
 ```
-* Ajouter les droits d'exécution (si nécessaire)
+* Ajouter les droits d'exécution (si nécessaire: `chmod +x ./fly`)
 * Ajouter l'outil dans le `PATH`
 
 Contrairement à d'autres outils en ligne de commande, `fly` ne mémorise pas de contexte implicitement. A chaque exécution, vous devez spécifier la _`target`_.
