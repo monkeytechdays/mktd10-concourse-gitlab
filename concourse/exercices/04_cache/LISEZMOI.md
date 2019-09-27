@@ -93,7 +93,6 @@ run:
 caches:
   - path: cache
 ```
-
 Cependant le cache est relatif à l'agent, au nom du job et au nom de la tâche. Ce qui utile si une tâche est dédiée à la récupération des dépendances.
 
 ## Exercice 04a - Partage des dépendences Node.js
