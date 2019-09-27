@@ -34,7 +34,7 @@ Concourse vient avec un outil en ligne de commande nommé `fly`.
 * Télécharger l'outil en ligne de commande soit depuis l'interface Web, soit depuis la ligne de commande
 ```bash
 # Example
-wget -o './fly' 'http://localhost:8080/api/v1/cli?arch=amd64&platform=linux'
+wget -O './fly' 'http://localhost:8080/api/v1/cli?arch=amd64&platform=linux'
 ```
 * Ajouter les droits d'exécution (si nécessaire)
 * Ajouter l'outil dans le `PATH`
