@@ -51,7 +51,7 @@ fly --target 'local' login --concourse-url 'http://localhost:8080'
 fly -t 'local' login -c 'http://localhost:8080'
 ```
 
-La commande étant interactive, il suffit de suivre les instructions. La solution la plus simple est d'ouvrir le lien fournit (ou d'ajouter l'option `-b`) qui permet de renseigner les idenfiants directement depuis le navigateur.
+La commande étant interactive, il suffit de suivre les instructions. La solution la plus simple est d'ouvrir le lien fournit (ou d'ajouter l'option `-b`) qui permet de renseigner les identifiants directement depuis le navigateur.
 
 Pour lister les cibles déjà renseignées, il suffit d'exécuter la commande `targets`.
 
