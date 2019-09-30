@@ -20,7 +20,7 @@ Pour optimiser, nous voudrons aussi mettre en cache de Gitlab le cache de dépen
 Nous voudrons enfin publier le `.jar` buildé.
 
 Pour information:
-- voici la commande pour builder un jar: `mvn -Dskip.test=true package`
+- voici la commande pour builder un jar: `mvn -DskipTests package`
 - la commande précédente produit un `.jar` dans le répertoire `target`.
 - voici la commande pour faire passer les tests: `mvn verify`
 - par défaut, Maven a son cache de dépendance dans le répertoire `.m2` du répertoire HOME de l'utilisateur
