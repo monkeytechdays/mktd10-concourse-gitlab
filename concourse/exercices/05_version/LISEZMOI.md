@@ -48,11 +48,11 @@ jobs:
   - name: new-rc
     plan:
       - put: version
-        pre: rc
+        params: {pre: rc}
   - name: prepare-release
     plan:
       - get: version
-        bump: major
+        params: {bump: major}
 ```
 
 Une fois la stratégie de version mise au point, la difficulté reste de la répercuter sur les différents outils. Voici quelques exemples :
