@@ -108,7 +108,7 @@ En Node.js, les dépendances sont installées à la racine du projet dans un ré
 
 ## Exercice 04b - Cache des dépendances Maven
 
-Avec Maven, les dépendances sont installées sous `$HOME/.m2/repository` afin d'être partagées entre différents projets. Elles sont normalement récupérées au fur et à mesure qu'elles sont nécessaires mais il est possible d'utiliser la commande `mvn dependency:go-offline`
+Avec Maven, les dépendances sont installées sous `$HOME/.m2/repository` afin d'être partagées entre différents projets. Elles sont normalement récupérées au fur et à mesure qu'elles sont nécessaires mais il est possible d'utiliser la commande `mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline -DoverWriteIfNewer=false`
 
 * Réalisez un _pipeline_ qui :
     * récupère les sources du projet Maven (voir `/projects/my-spark-app`)
