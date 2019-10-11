@@ -1,0 +1,17 @@
+platform: linux
+image_resource:
+    type: docker-image
+    source:
+        repository: nexus:8083/node
+        tag: 10.16.3-stretch
+        insecure_registries: [ "nexus:8083" ]
+
+inputs:
+  - name: ci
+  - name: src
+  - name: node_modules
+outputs:
+  - name: out
+
+run:
+    path: ci/scripts/npm-build.sh

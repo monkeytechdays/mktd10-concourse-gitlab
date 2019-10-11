@@ -1,0 +1,103 @@
+resources:
+  - name: ci
+    type: git
+    icon: script-text-outline
+    source:
+        uri: http://gogs:3000/mktd10-concourse/05a-continuous-delivery.git
+        branch: master
+  - name: frontend
+    type: git
+    icon: web
+    source:
+        uri: http://gogs:3000/mktd10-concourse/my-react-app.git
+        branch: master
+  - name: backend
+    type: git
+    icon: server-network
+    source:
+        uri: http://gogs:3000/mktd10-concourse/my-spark-app.git
+        branch: master
+  - name: version
+    type: semver
+    icon: numeric-0-box-multiple-outline
+    source:
+        initial_version: 1.0.0
+        driver: s3
+        endpoint: http://s3:9000
+        disable_ssl: true
+        bucket: concourse
+        key: 05_version/05a-continuous-delivery/version.txt
+        access_key_id: minio-access-key
+        secret_access_key: minio-secret-key
+  - name: bundle
+    type: s3
+    icon: archive
+    source:
+        endpoint: http://s3:9000
+        disable_ssl: true
+        bucket: concourse
+        regexp: 05_version/05a-continuous-delivery/my-bundle-app-(.*).tar.gz
+        access_key_id: minio-access-key
+        secret_access_key: minio-secret-key
+
+jobs:
+  - name: continuous-delivery
+    plan:
+      - get: frontend
+      - get: backend
+      - get: ci
+      - put: version
+        params:
+            bump: minor
+      - task: frontend-setversion
+        file: ci/tasks/npm-setversion.yml
+        input_mapping:
+            src: frontend
+        output_mapping:
+            out: frontend-v
+      - task: backend-setversion
+        file: ci/tasks/maven-setversion.yml
+        input_mapping:
+            src: backend
+        output_mapping:
+            out: backend-v
+      - task: frontend-dependencies
+        file: ci/tasks/npm-install.yml
+        input_mapping:
+            src: frontend-v
+      - task: frontend-build
+        file: ci/tasks/npm-build.yml
+        input_mapping:
+            src: frontend-v
+        output_mapping:
+            out: frontend-release
+      - task: backend-build
+        file: ci/tasks/maven-build.yml
+        input_mapping:
+            src: backend-v
+        output_mapping:
+            out: backend-release
+        vars:
+            main-artifacts: my-spark-app-*.jar
+      - task: frontend-test
+        file: ci/tasks/npm-test.yml
+        input_mapping:
+            src: frontend-v
+      - task: backend-test
+        file: ci/tasks/maven-test.yml
+        input_mapping:
+            src: backend-v
+      - task: bundle
+        file: ci/tasks/bundle.yml
+        input_mapping:
+            in0: frontend-release
+            in1: backend-release
+        params:
+            format: tgz
+            basename: my-bundle-app
+            in0_target: frontend
+            in1_target: backend
+      - put: bundle
+        params:
+            file: bundle/my-bundle-app-*.tar.gz
+

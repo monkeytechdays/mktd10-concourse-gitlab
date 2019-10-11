@@ -1,0 +1,50 @@
+platform: linux
+image_resource:
+    type: docker-image
+    source:
+        repository: nexus:8083/debian
+        tag: stretch
+        insecure_registries: [ "nexus:8083" ]
+
+inputs:
+  - name: ci
+  - name: version
+    optional: true
+  - name: in0
+  - name: in1
+    optional: true
+  - name: in2
+    optional: true
+  - name: in3
+    optional: true
+  - name: in4
+    optional: true
+  - name: in5
+    optional: true
+  - name: in6
+    optional: true
+  - name: in7
+    optional: true
+  - name: in8
+    optional: true
+  - name: in9
+    optional: true
+outputs:
+  - name: bundle
+
+run:
+    path: ci/scripts/bundle.sh
+
+params:
+  format:
+  basename:
+  in0_target:
+  in1_target:
+  in2_target:
+  in3_target:
+  in4_target:
+  in5_target:
+  in6_target:
+  in7_target:
+  in8_target:
+  in9_target:
