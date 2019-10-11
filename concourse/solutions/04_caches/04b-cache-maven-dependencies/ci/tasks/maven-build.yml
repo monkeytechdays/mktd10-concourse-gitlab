@@ -1,0 +1,17 @@
+platform: linux
+image_resource:
+    type: docker-image
+    source:
+        repository: nexus:8083/maven
+        tag: 3.6.2-jdk-8
+        insecure_registries: [ "nexus:8083" ]
+
+
+inputs:
+  - name: ci
+  - name: src
+  - name: m2
+
+run:
+    path: ci/scripts/maven.sh
+    args: ["package", "-Dmaven.test.skip=true", "--offline"]

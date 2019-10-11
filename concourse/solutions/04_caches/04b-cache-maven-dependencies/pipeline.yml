@@ -1,0 +1,25 @@
+resources:
+  - name: src
+    type: git
+    icon: git
+    source:
+        uri: http://gogs:3000/mktd10-concourse/my-spark-app.git
+        branch: master
+  - name: ci
+    type: git
+    icon: git
+    source:
+        uri: http://gogs:3000/mktd10-concourse/04b-cache-maven-dependencies.git
+        branch: master
+
+jobs:
+  - name: deliver-app
+    plan:
+      - get: src
+      - get: ci
+      - task: init
+        file: ci/tasks/maven-get-dependencies.yml
+      - task: build
+        file: ci/tasks/maven-build.yml
+      - task: test
+        file: ci/tasks/maven-test.yml
